@@ -1,7 +1,10 @@
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
 const bodyParser = require("body-parser");
+
 const Razorpay = require("razorpay");
+
 const app = express();
 const rzp_key_id = "rzp_test_z0YkACPaTVanaP";
 const rzp_key_secret = "6JX49RGrpXUcqKwl5KqSw9J2";
@@ -11,6 +14,16 @@ require("dotenv").config();
 const movieRouter = require("./routes/movies");
 const mongoUtil = require("./mongoUtil");
 const wotRouter = require("./routes/wot");
+
+app.set("trust proxy", 1);
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true },
+  })
+);
 
 mongoUtil.connectToServer(function (err, client) {
   if (err) console.log(err);
@@ -42,7 +55,7 @@ app.post("/rzp-checkout", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  console.log("Home at 5000");
+  console.log("Home at 8000");
   res.send("Hello from 8000");
 });
 const vapidKeys = {

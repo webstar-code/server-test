@@ -1,9 +1,44 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const wotRouter = express.Router();
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const axios = require("axios");
 const dotenv = require("dotenv");
 var mongoUtil = require("../mongoUtil");
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/callback",
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      user = { profile: profile.id };
+      return cb(null, user);
+    }
+  )
+);
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
+
+wotRouter.get("/auth", passport.authenticate("google", { scope: ["profile"] }));
+
+wotRouter.get(
+  "/auth/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/");
+  }
+);
 
 wotRouter.post("/zoom", async (req, res) => {
   var token = "";
